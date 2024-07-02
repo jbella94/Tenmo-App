@@ -2,8 +2,11 @@ package com.techelevator.tenmo;
 
 import com.techelevator.tenmo.model.AuthenticatedUser;
 import com.techelevator.tenmo.model.UserCredentials;
+import com.techelevator.tenmo.services.AccountService;
 import com.techelevator.tenmo.services.AuthenticationService;
 import com.techelevator.tenmo.services.ConsoleService;
+
+import java.math.BigDecimal;
 
 public class App {
 
@@ -12,18 +15,23 @@ public class App {
     private final ConsoleService consoleService = new ConsoleService();
     private final AuthenticationService authenticationService = new AuthenticationService(API_BASE_URL);
 
+    private final AccountService accountService = new AccountService(API_BASE_URL);
+
     private AuthenticatedUser currentUser;
 
     public static void main(String[] args) {
         App app = new App();
         app.run();
+
     }
+    
 
     private void run() {
         consoleService.printGreeting();
         loginMenu();
         if (currentUser != null) {
             mainMenu();
+
         }
     }
     private void loginMenu() {
@@ -86,8 +94,23 @@ public class App {
 
 	private void viewCurrentBalance() {
 		// TODO Auto-generated method stub
+//        BigDecimal balance = accountService.getBalanceByAccountId(accountId);
+//        System.out.println("Your current Balance is : $ " + balance);
+        if (currentUser != null) {
+            // Assuming there's a method in AuthenticationService or related service to fetch balance
+            int accountId = currentUser.getUser().getId();
+            BigDecimal balance = accountService.getCurrentBalance(currentUser.getToken(), accountId);
+            if (balance != null) {
+                System.out.println("Your current account balance is: $" + balance);
+            } else {
+                System.out.println("Failed to fetch balance.");
+            }
+        } else {
+            System.out.println("You need to login first.");
+        }
+    }
 		
-	}
+
 
 	private void viewTransferHistory() {
 		// TODO Auto-generated method stub

@@ -18,13 +18,15 @@ public class AccountController {
 
     private AccountDao accountDao;
 
+   // private AccountService accountService;
+
     @Autowired
     public AccountController(AccountDao accountDao) {
         this.accountDao = accountDao;
     }
 
-    //Create pathway to server to implement getAccountBalanceByAccountId
-    @GetMapping("/{accountId}")
+//    Create pathway to server to implement getAccountBalanceByAccountId
+    @GetMapping("/{accountId}/balance")
     public ResponseEntity<Account> get(@PathVariable int accountId) {
         Account account = accountDao.getAccountBalanceByAccountId(accountId);
         if (account == null) {
@@ -33,5 +35,6 @@ public class AccountController {
             return new ResponseEntity<>(account, HttpStatus.OK);
         }
     }
+
 
 }
