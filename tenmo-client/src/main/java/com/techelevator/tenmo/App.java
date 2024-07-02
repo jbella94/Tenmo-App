@@ -24,7 +24,7 @@ public class App {
         app.run();
 
     }
-    
+
 
     private void run() {
         consoleService.printGreeting();
@@ -98,8 +98,8 @@ public class App {
 //        System.out.println("Your current Balance is : $ " + balance);
         if (currentUser != null) {
             // Assuming there's a method in AuthenticationService or related service to fetch balance
-            int accountId = currentUser.getUser().getId();
-            BigDecimal balance = accountService.getCurrentBalance(currentUser.getToken(), accountId);
+            //int accountId = currentUser.getUser().getId();
+            BigDecimal balance = accountService.getCurrentBalance(currentUser.getToken());
             if (balance != null) {
                 System.out.println("Your current account balance is: $" + balance);
             } else {

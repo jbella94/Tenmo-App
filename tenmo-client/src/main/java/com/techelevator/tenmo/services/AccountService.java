@@ -31,21 +31,23 @@ public class AccountService {
 //        }
 //        return returnedBalance;
 //    }
-    public BigDecimal getCurrentBalance(String authToken, int accountId) {
+    public BigDecimal getCurrentBalance(String authToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(authToken);
         HttpEntity<?> entity = new HttpEntity<>(headers);
         BigDecimal balance = null;
+        Account account = null;
         try {
-            String url = API_BASE_URL + "accounts/" + accountId + "/balance";
+            String url = API_BASE_URL + "accounts/balance";
             System.out.println("Fetching balance from URL: " + url);
-            ResponseEntity<BigDecimal> response = restTemplate.exchange(
+            ResponseEntity<Account> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     entity,
-                    BigDecimal.class
+                    Account.class
             );
-            balance = response.getBody();
+            account = response.getBody();
+            balance = account.getBalance();
         } catch (RestClientResponseException | ResourceAccessException e) {
             BasicLogger.log(e.getMessage());
         }
