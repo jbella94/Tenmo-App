@@ -7,5 +7,5 @@ public interface AccountDao {
     Account getAccountBalanceByAccountId(int userId);
 
 
-
+    void save(Account Account);
 }

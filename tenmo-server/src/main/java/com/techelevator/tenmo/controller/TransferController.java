@@ -66,7 +66,7 @@ public class TransferController {
         this.accountDao = accountDao;
         this.userDao = userDao;
     }
-    @GetMapping("/maketransfer")
+    @PostMapping("/maketransfer")
     public ResponseEntity<String> makeTransfer(@RequestBody TransferDto transferDto, Principal principal) {
         // Get the authenticated user (sender)
         User sender = userDao.getUserByUsername(principal.getName());
@@ -75,27 +75,30 @@ public class TransferController {
         }
         // Get the recipient user
         User recipient = userDao.getUserById(transferDto.getAccountTo());
+        if (recipient == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sender not found");
+        }
 //                .orElseThrow(() -> new RuntimeException("Recipient not found"));
         // Get the sender's and recipient's accounts
         Account senderAccount = accountDao.getAccountBalanceByAccountId(sender.getId());
         Account recipientAccount = accountDao.getAccountBalanceByAccountId(recipient.getId());
         // Sender Limitations
-        if (transferDto.getAccountFrom() == transferDto.getAccountFrom()) {
+        if (transferDto.getAccountFrom() == transferDto.getAccountTo()) {
             throw new IllegalArgumentException("Cannot send money to yourself");
         }
         if (transferDto.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Cannot send $0 or negative funds.");
         }
         BigDecimal fromAccountBalance = accountDao.getAccountBalanceByAccountId(transferDto.getAccountFrom()).getBalance();
-        if (fromAccountBalance.compareTo(BigDecimal.ZERO) < 0) {
+        if (fromAccountBalance.compareTo(transferDto.getAmount()) < 0) {
             throw new IllegalArgumentException("You have insufficient funds for transfer.");
         }
         // Perform the transfer: update balances
         senderAccount.setBalance(senderAccount.getBalance().subtract(transferDto.getAmount()));
         recipientAccount.setBalance(recipientAccount.getBalance().add(transferDto.getAmount()));
-//        // Save the updated accounts
-//        accountDao.save(senderAccount);
-//        accountDao.save(recipientAccount);
+        // Save the updated accounts
+        accountDao.save(senderAccount);
+        accountDao.save(recipientAccount);
 //        // Create the transfer record
 //        Transfer transfer = new Transfer();
 //        transfer.setAccountFrom(sender.getId());
@@ -103,6 +106,6 @@ public class TransferController {
 //        transfer.setAmount(transferDto.getAmount());
 //        transferDao.save(transfer);
         // Return a success response
-        return ResponseEntity.ok("Transfer successful");
+        return ResponseEntity.ok("Approved");
     }
 }

@@ -30,6 +30,15 @@ public class JdbcAccountDao implements AccountDao {
         return account;
     }
 
+    @Override
+    public void save(Account account) {
+        String sql = "UPDATE account SET balance = ? WHERE account_id = ?";
+        int rowsAffected = jdbcTemplate.update(sql, account.getBalance(), account.getAccountId());
+        if (rowsAffected == 0) {
+            throw new RuntimeException("Failed to update account with ID " + account.getAccountId());
+        }
+    }
+
     private Account mapRowToAccount(SqlRowSet rowSet) {
         Account account = new Account();
         account.setAccountId(rowSet.getInt("account_id"));
