@@ -1,12 +1,16 @@
 package com.techelevator.tenmo;
 
 import com.techelevator.tenmo.model.AuthenticatedUser;
+import com.techelevator.tenmo.model.Transfer;
+import com.techelevator.tenmo.model.TransferDto;
 import com.techelevator.tenmo.model.UserCredentials;
 import com.techelevator.tenmo.services.AccountService;
 import com.techelevator.tenmo.services.AuthenticationService;
 import com.techelevator.tenmo.services.ConsoleService;
+import com.techelevator.tenmo.services.TransferService;
 
 import java.math.BigDecimal;
+import java.util.Scanner;
 
 public class App {
 
@@ -16,7 +20,12 @@ public class App {
     private final AuthenticationService authenticationService = new AuthenticationService(API_BASE_URL);
 
     private final AccountService accountService = new AccountService(API_BASE_URL);
+    private final TransferService transferService = new TransferService(API_BASE_URL);
 
+    private final TransferDto transferDto = new TransferDto();
+
+
+    private final Scanner scanner = new Scanner(System.in);
     private AuthenticatedUser currentUser;
 
     public static void main(String[] args) {
@@ -124,7 +133,39 @@ public class App {
 
 	private void sendBucks() {
 		// TODO Auto-generated method stub
-		
+        if(currentUser != null){
+            System.out.println("Enter recipient User Id: ");
+            int accountTo = Integer.parseInt(scanner.nextLine());
+
+            System.out.println("Enter transfer amount");
+            BigDecimal amount = new BigDecimal(scanner.nextLine());
+
+            TransferDto transferDto = new TransferDto();
+            transferDto.setAccountFrom(currentUser.getUser().getId());
+            transferDto.setAccountTo(accountTo);
+            transferDto.setAmount(amount);
+
+            String transferOutcome = transferService.sendBucks(currentUser.getToken(), transferDto);
+
+            if (transferOutcome != null){
+                System.out.println(transferOutcome);
+            }else{
+                System.out.println("Transfer failed");
+            }
+        }
+//		if(currentUser != null){
+//        String transferOutcome = transferService.sendBucks(currentUser.getToken(), transferDto);
+//        System.out.println("Enter recipient User ID: ");
+//        int accountTo = Integer.parseInt(scanner.nextLine());
+//        System.out.println("Enter transfer amount: ");
+//        BigDecimal amount = new BigDecimal(scanner.nextLine());
+//        if(transferOutcome != null){
+//            System.out.println(transferOutcome);
+//        }else{
+//            System.out.println("Transfer failed");
+//        }
+//
+//        }
 	}
 
 	private void requestBucks() {
