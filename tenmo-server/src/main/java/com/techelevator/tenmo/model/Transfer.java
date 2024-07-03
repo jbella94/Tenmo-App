@@ -11,10 +11,10 @@ public class Transfer {
     private int accountTo;
     private BigDecimal amount;
 
-    public Transfer( int accountFrom, int accountTo, BigDecimal amount) {
+    public Transfer(int transferTypeId, int transferStatusId ,int accountFrom, int accountTo, BigDecimal amount) {
 //        this.transferId = transferId;
-//        this.transferTypeId = transferTypeId;
-//        this.transferStatusId = transferStatusId;
+        this.transferTypeId = transferTypeId;
+        this.transferStatusId = transferStatusId;
         this.accountFrom = accountFrom;
         this.accountTo = accountTo;
         this.amount = amount;

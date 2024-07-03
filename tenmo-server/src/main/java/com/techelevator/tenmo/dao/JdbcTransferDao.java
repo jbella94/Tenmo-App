@@ -32,7 +32,7 @@ public class JdbcTransferDao implements TransferDao {
 
     @Override
     public Transfer makeTransfer(TransferDto transferDto) {
-        userDao.getUsers();
+//        userDao.getUsers();
 
         try {
             //CHECK IF PARAMETERS BELOW//
@@ -50,14 +50,16 @@ public class JdbcTransferDao implements TransferDao {
         //SQL QUERIES
         String updateBalanceSender = "UPDATE account SET balance = balance - ? WHERE account_id = ?";
         String updateBalanceReceiver = "UPDATE account SET balance = balance + ? WHERE account_id = ?";
-        String insertTransferInfo = "INSERT INTO transfer (account_from, account_to, amount) VALUES (?, ?, ?)";
+        String insertTransferInfo = "INSERT INTO transfer (transfer_type_id, transfer_status_id, account_from, account_to, amount) VALUES (?, ?, ?, ?, ?)";
+
 
         //CONNECT VIA JDBC TEMPLATE
             jdbcTemplate.update(updateBalanceSender, transferDto.getAmount(), transferDto.getAccountFrom());
             jdbcTemplate.update(updateBalanceReceiver, transferDto.getAmount(), transferDto.getAccountTo());
-            jdbcTemplate.update(insertTransferInfo, transferDto.getAccountFrom(), transferDto.getAccountTo(), transferDto.getAmount());
+//            jdbcTemplate.update(insertTransferInfo, 1, 1,transferDto.getAccountFrom(), transferDto.getAccountTo(), transferDto.getAmount());
+            jdbcTemplate.update(insertTransferInfo, 1, 1, transferDto.getAccountFrom(), transferDto.getAccountTo(), transferDto.getAmount());
 
-            return new Transfer(transferDto.getAccountFrom(), transferDto.getAccountTo(), transferDto.getAmount());
+            return new Transfer(1,1, transferDto.getAccountFrom(), transferDto.getAccountTo(), transferDto.getAmount());
         } catch (Exception e) {
             throw new RuntimeException("Error has occurred while processing transfer...");
         }
@@ -67,9 +69,9 @@ public class JdbcTransferDao implements TransferDao {
 
     private Transfer mapRowToTransfer(SqlRowSet rowSet) {
         Transfer transfer = new Transfer();
-//        transfer.setTransferId(rowSet.getInt("transfer_Id"));
-//        transfer.setTransferTypeId(rowSet.getInt("transfer_type_id"));
-//        transfer.setTransferStatusId(rowSet.getInt("transfer_status_id"));
+        transfer.setTransferId(rowSet.getInt("transfer_Id"));
+        transfer.setTransferTypeId(rowSet.getInt("transfer_type_id"));
+        transfer.setTransferStatusId(rowSet.getInt("transfer_status_id"));
         transfer.setAccountFrom(rowSet.getInt("account_from"));
         transfer.setAccountTo(rowSet.getInt("account_to"));
         transfer.setAmount(rowSet.getBigDecimal("amount"));
