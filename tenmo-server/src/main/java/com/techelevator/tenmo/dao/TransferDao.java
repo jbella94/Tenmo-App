@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 public interface TransferDao {
 
     Transfer makeTransfer(TransferDto transferDto);
+
+    public Transfer getTransferById(int transferId);
 }
