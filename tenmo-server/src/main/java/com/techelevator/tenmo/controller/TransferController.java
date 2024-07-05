@@ -104,7 +104,7 @@ public class TransferController {
 //        transfer.setAccountFrom(sender.getId());
 //        transfer.setAccountTo(recipient.getId());
 //        transfer.setAmount(transferDto.getAmount());
-//        transferDao.save(transfer);
+        transferDao.makeTransfer(transferDto);
         // Return a success response
         return ResponseEntity.ok("Approved");
     }

@@ -63,21 +63,23 @@ public class JdbcTransferDao implements TransferDao {
             throw new IllegalArgumentException("You have insufficient funds for transfer.");
         }
 
-        String sqlInsertTransfer = "INSERT INTO transfer (transfer_type_id, transfer_status_id, account_from, account_to, amount) VALUES (?, ?, ?, ?, ?) RETURNING transfer_id";
-        String sqlUpdateBalanceSender = "UPDATE account SET balance = balance - ? WHERE account_id = ?";
-        String sqlUpdateBalanceReceiver = "UPDATE account SET balance = balance + ? WHERE account_id = ?";
+        String sqlInsertTransfer = "INSERT INTO transfer (transfer_type_id, transfer_status_id, account_from, account_to, amount) VALUES (?, ?, (SELECT account_id FROM account WHERE user_id = ?),  (SELECT account_id FROM account WHERE user_id = ?), ?) RETURNING transfer_id";
+//        String sqlUpdateBalanceSender = "UPDATE account SET balance = balance - ? WHERE account_id = ?";
+//        String sqlUpdateBalanceReceiver = "UPDATE account SET balance = balance + ? WHERE account_id = ?";
+        transferDto.setTransferTypeId(2);
+        transferDto.setTransferStatusId(2);
 
         try {
             // Insert the transfer and get the new transfer ID
             int newTransferId = jdbcTemplate.queryForObject(
-                    sqlInsertTransfer,
-                    new Object[]{transferDto.getTransferTypeId(), transferDto.getTransferStatusId(), transferDto.getAccountFrom(), transferDto.getAccountTo(), transferDto.getAmount()},
-                    Integer.class
+                    sqlInsertTransfer, Integer.class,
+                    transferDto.getTransferTypeId(), transferDto.getTransferStatusId(), transferDto.getAccountFrom(), transferDto.getAccountTo(), transferDto.getAmount()
+
             );
 
             // Update the balances of the sender and receiver
-            jdbcTemplate.update(sqlUpdateBalanceSender, transferDto.getAmount(), transferDto.getAccountFrom());
-            jdbcTemplate.update(sqlUpdateBalanceReceiver, transferDto.getAmount(), transferDto.getAccountTo());
+//            jdbcTemplate.update(sqlUpdateBalanceSender, transferDto.getAmount(), transferDto.getAccountFrom());
+//            jdbcTemplate.update(sqlUpdateBalanceReceiver, transferDto.getAmount(), transferDto.getAccountTo());
 
             // Retrieve the new transfer object
             newTransfer = getTransferById(newTransferId);
