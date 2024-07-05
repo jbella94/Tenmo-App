@@ -32,9 +32,7 @@ public class TransferService {
 
 
         String transferOutcome = null;
-//        int accountFrom = 0;
-//        int accountTo = 0;
-//        BigDecimal amount = BigDecimal.valueOf(0);
+
         try{
             String url = API_BASE_URL + "accounts/transfers/maketransfer";
             System.out.println("Fetching transfer information from" + url);

@@ -18,41 +18,6 @@ import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.List;
 
-//@RestController
-//@RequestMapping(path = "/accounts/transfers")
-//@PreAuthorize("isAuthenticated()")
-//
-//public class TransferController {
-//
-//    private TransferDao transferDao;
-//    private AccountDao accountDao;
-//    private UserDao userDao;
-//
-//    @Autowired
-//    public TransferController(TransferDao transferDao, AccountDao accountDao, UserDao userDao) {
-//        this.transferDao = transferDao;
-//        this.accountDao = accountDao;
-//        this.userDao = userDao;
-//    }
-//
-//    @GetMapping("/maketransfer")
-//    public ResponseEntity<Transfer> makeTransfer(TransferDto transferDto, Principal principal) {
-//        User user = userDao.getUserByUsername(principal.getName());
-//
-//        transferDto.setAccountFrom(user.getId());
-//
-//        Transfer transfer = transferDao.makeTransfer(transferDto);
-//
-//        return ResponseEntity.status(HttpStatus.CREATED).body(transfer);
-//
-//
-//    }
-//
-//    @GetMapping("/viewtransferinfo")
-//    public ResponseEntity<List<Transfer>>
-//
-//
-//}
 @RestController
 @RequestMapping(path = "/accounts/transfers")
 @PreAuthorize("isAuthenticated()")
@@ -76,9 +41,9 @@ public class TransferController {
         // Get the recipient user
         User recipient = userDao.getUserById(transferDto.getAccountTo());
         if (recipient == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sender not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Recipient not found");
         }
-//                .orElseThrow(() -> new RuntimeException("Recipient not found"));
+
         // Get the sender's and recipient's accounts
         Account senderAccount = accountDao.getAccountBalanceByAccountId(sender.getId());
         Account recipientAccount = accountDao.getAccountBalanceByAccountId(recipient.getId());
@@ -99,13 +64,21 @@ public class TransferController {
         // Save the updated accounts
         accountDao.save(senderAccount);
         accountDao.save(recipientAccount);
-//        // Create the transfer record
-//        Transfer transfer = new Transfer();
-//        transfer.setAccountFrom(sender.getId());
-//        transfer.setAccountTo(recipient.getId());
-//        transfer.setAmount(transferDto.getAmount());
+
         transferDao.makeTransfer(transferDto);
         // Return a success response
         return ResponseEntity.ok("Approved");
+    }
+
+
+    //Created API Endpoint for transfers based on UserId
+    @GetMapping("/user/{userId}")
+    public List<Transfer> getTransfersByUserId(@PathVariable int userId) {
+        return transferDao.getTransfersByUserId(userId);
+    }
+    //Created API Endpoint for transfers based on TransferId
+    @GetMapping("/{transferId}")
+    public Transfer getTransferById(@PathVariable int transferId) {
+        return transferDao.getTransferById(transferId);
     }
 }
