@@ -39,7 +39,7 @@ public class TransferService {
         String transferOutcome = null;
 
         try{
-            String url = API_BASE_URL + "accounts/transfers/{userId}/transferhistory";
+            String url = API_BASE_URL + "accounts/transfers/maketransfer";
             System.out.println("Fetching transfer information from" + url);
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
             transferOutcome = response.getBody();
