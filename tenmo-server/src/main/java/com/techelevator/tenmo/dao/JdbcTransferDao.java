@@ -11,6 +11,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 @Repository
@@ -84,7 +85,7 @@ public class JdbcTransferDao implements TransferDao {
     @Override
     public List<Transfer> getTransfersByUserId(int userId) {
         List<Transfer> transfers = new ArrayList<>();
-        String sql = "SELECT * FROM transfer WHERE account_from = ? OR account_to = ?";
+        String sql = "SELECT * FROM transfer WHERE account_from IN (SELECT account_id FROM account WHERE user_id = ?) OR account_to IN (SELECT account_id FROM account WHERE user_id = ?)";
         SqlRowSet results = jdbcTemplate.queryForRowSet(sql, userId, userId);
         while (results.next()) {
             transfers.add(mapRowToTransfer(results));

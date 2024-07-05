@@ -72,9 +72,14 @@ public class TransferController {
 
 
     //Created API Endpoint for transfers based on UserId
-    @GetMapping("/user/{userId}")
-    public List<Transfer> getTransfersByUserId(@PathVariable int userId) {
-        return transferDao.getTransfersByUserId(userId);
+    @GetMapping("/{userId}/transferhistory")
+    public ResponseEntity <List <Transfer>> getTransfersByUserId(@PathVariable int userId, Principal principal) {
+        User authenticatedUser = userDao.getUserByUsername(principal.getName());
+        if(authenticatedUser.getId() != userId){
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        List<Transfer> transfers = transferDao.getTransfersByUserId(userId);
+        return new ResponseEntity<>(transfers, HttpStatus.OK);
     }
     //Created API Endpoint for transfers based on TransferId
     @GetMapping("/{transferId}")

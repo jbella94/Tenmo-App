@@ -2,7 +2,6 @@ package com.techelevator.tenmo.dao;
 
 import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.TransferDto;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
