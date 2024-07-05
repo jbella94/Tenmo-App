@@ -21,6 +21,7 @@ public class App {
     private final TransferDto transferDto = new TransferDto();
 
 
+
     private final Scanner scanner = new Scanner(System.in);
     private AuthenticatedUser currentUser;
 
@@ -119,6 +120,33 @@ public class App {
 
 	private void viewTransferHistory() {
 		// TODO Auto-generated method stub
+        if(currentUser != null){
+            System.out.println("-----------------------------");
+            System.out.println("Would you like to view all transfers or a specific transfer?");
+            System.out.println("-----------------------------");
+            System.out.println("To view all transfers enter 1 ");
+            System.out.println("To view a specific transfer enter 2 ");
+            System.out.println("-----------------------------");
+            System.out.print("Please choose an option: ");
+
+
+
+            int userSelection = Integer.parseInt(scanner.nextLine());
+            if(userSelection == 1){
+                List<Transfer> transfers = transferService.viewTransferHistory(currentUser.getToken(), currentUser.getUser().getId());
+                for(Transfer transfer : transfers){
+                    System.out.println(transfer);
+                }
+            }else if(userSelection == 2){
+                System.out.print("Please insert transfer ID: ");
+                int userSelection2 = Integer.parseInt(scanner.nextLine());
+                Transfer transfer = transferService.viewTransferById(currentUser.getToken(), userSelection2);
+                System.out.println(transfer);
+            }else {
+                System.out.println("Invalid selection");
+            }
+
+        }
 		
 	}
 
@@ -160,25 +188,13 @@ public class App {
                     System.out.println("Transfer failed");
                 }
             }
-//		if(currentUser != null){
-//        String transferOutcome = transferService.sendBucks(currentUser.getToken(), transferDto);
-//        System.out.println("Enter recipient User ID: ");
-//        int accountTo = Integer.parseInt(scanner.nextLine());
-//        System.out.println("Enter transfer amount: ");
-//        BigDecimal amount = new BigDecimal(scanner.nextLine());
-//        if(transferOutcome != null){
-//            System.out.println(transferOutcome);
-//        }else{
-//            System.out.println("Transfer failed");
-//        }
 //
-//        }
         }
 
 
 	private void requestBucks() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

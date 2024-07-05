@@ -3,10 +3,15 @@ package com.techelevator.tenmo.services;
 import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.TransferDto;
 import com.techelevator.util.BasicLogger;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class TransferService {
@@ -34,7 +39,7 @@ public class TransferService {
         String transferOutcome = null;
 
         try{
-            String url = API_BASE_URL + "accounts/transfers/maketransfer";
+            String url = API_BASE_URL + "accounts/transfers/{userId}/transferhistory";
             System.out.println("Fetching transfer information from" + url);
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
             transferOutcome = response.getBody();
@@ -45,4 +50,75 @@ public class TransferService {
 
         return transferOutcome;
     }
-}
+
+    public List<Transfer> viewTransferHistory(String authToken, int userId){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(authToken);
+
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        List<Transfer> transferHistory = new ArrayList<>();
+
+
+
+        try{
+            String url = API_BASE_URL + "accounts/transfers/{userId}/transferhistory";
+            System.out.println("Fetching transfer information from" + url);
+
+            String expandedUrl = UriComponentsBuilder.fromUriString(url)
+                    .buildAndExpand(userId)
+                    .toUriString();
+
+//            ResponseEntity<Transfer> response = restTemplate.exchange(url, HttpMethod.GET, entity, Transfer.class);
+            ResponseEntity<List<Transfer>> response = restTemplate.exchange(
+                    expandedUrl,
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<List<Transfer>>() {}
+            );
+            transferHistory = response.getBody();
+
+        }catch (RestClientResponseException | ResourceAccessException e){
+            BasicLogger.log(e.getMessage());
+        }
+
+        return transferHistory;
+    }
+
+    public Transfer viewTransferById(String authToken, int transferId) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(authToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        Transfer transfer = null;
+
+        try {
+            String url = API_BASE_URL + "accounts/transfers/{transferId}";
+            System.out.println("Fetching transfer information from " + url);
+
+            String expandedUrl = UriComponentsBuilder.fromUriString(url)
+                    .buildAndExpand(transferId)
+                    .toUriString();
+
+            ResponseEntity<Transfer> response = restTemplate.exchange(
+                    expandedUrl,
+                    HttpMethod.GET,
+                    entity,
+                    Transfer.class
+            );
+
+            transfer = response.getBody();
+
+        } catch (RestClientResponseException | ResourceAccessException e) {
+            BasicLogger.log(e.getMessage());
+        }
+
+        return transfer;
+    }
+
+    }
+

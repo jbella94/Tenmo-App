@@ -60,10 +60,10 @@ public class Transfer {
                 "\n Transfer Details" +
                 "\n--------------------------------------------" +
                 "\n Transfer Id: " + transferId +
-                "\n Transfer Type Id:'" + transferTypeId + '\'' +
+                "\n Transfer Type Id: " + transferTypeId +
                 "\n Transfer Status Id: " + transferStatusId +
                 "\n Account From: " + accountFrom +
-                "\n Account To:'" + accountTo + '\'' +
+                "\n Account To: " + accountTo +
                 "\n Amount: " + amount;
 
     }
