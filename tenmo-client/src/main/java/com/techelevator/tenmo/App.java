@@ -3,6 +3,7 @@ package com.techelevator.tenmo;
 import com.techelevator.tenmo.model.*;
 import com.techelevator.tenmo.services.*;
 
+import javax.swing.*;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Scanner;
@@ -152,6 +153,18 @@ public class App {
 
 	private void viewPendingRequests() {
 		// TODO Auto-generated method stub
+
+        if(currentUser != null){
+            System.out.println("----------------------------");
+            System.out.println("Below are your pending transfers:");
+            List<Transfer> transfers = transferService.viewPendingRequests(currentUser.getToken(), currentUser.getUser().getId());
+            for(Transfer transfer : transfers){
+                System.out.println(transfers);
+            }
+
+        }else {
+            System.out.println("Invalid Selection");
+        }
 		
 	}
 
@@ -195,6 +208,38 @@ public class App {
 	private void requestBucks() {
 		// TODO Auto-generated method stub
 
+        if(currentUser != null){
+            List<User> users = userService.getAllUsers(currentUser.getToken());
+            System.out.println("---------------------------------");
+            System.out.println("Available users to request bucks from:");
+            System.out.println("---------------------------------");
+            for(User user : users) {
+                if (user.getId() != currentUser.getUser().getId()) {
+                    System.out.println("User ID: " + user.getId() + ", Username: " + user.getUsername());
+                }
+            }
+                System.out.println("------------------------------");
+                System.out.print("Enter recipient User Id: ");
+                int accountRequested = Integer.parseInt(scanner.nextLine());
+
+                System.out.print("Enter transfer amount: ");
+                BigDecimal amount = new BigDecimal(scanner.nextLine());
+
+                TransferDto transferDto = new TransferDto();
+                transferDto.setAccountFrom(currentUser.getUser().getId());
+                transferDto.setAccountTo(accountRequested);
+                transferDto.setAmount(amount);
+
+                String requestOutcome = transferService.requestBucks(currentUser.getToken(), transferDto);
+
+                if(requestOutcome != null){
+                    System.out.println("Request sent");
+                }else{
+                    System.out.println("Request failed");
+                }
+            }
+        }
+
 	}
 
-}
+
