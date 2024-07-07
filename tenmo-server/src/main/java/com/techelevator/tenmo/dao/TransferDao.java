@@ -14,4 +14,8 @@ public interface TransferDao {
 
     //Created interface method which will be overriden in jdbctransferdao for listing the transfers
     List<Transfer> getTransfersByUserId(int userId);
+
+    Transfer createTransferRequest(TransferDto transferDto);
+
+    List<Transfer> getPendingTransfersByUserId(int userId);
 }

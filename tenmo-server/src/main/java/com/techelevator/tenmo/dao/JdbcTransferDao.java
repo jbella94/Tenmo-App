@@ -11,7 +11,6 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 @Repository
@@ -41,8 +40,16 @@ public class JdbcTransferDao implements TransferDao {
         }
         return null;
     }
-
+    @Override
     public Transfer makeTransfer(TransferDto transferDto) {
+        return insertTransfer(transferDto, 2, 2); // Send transfer with Approved status
+    }
+
+    public Transfer createTransferRequest(TransferDto transferDto) {
+        return insertTransfer(transferDto, 1, 1); // Request transfer with Pending status
+    }
+
+    private Transfer insertTransfer(TransferDto transferDto, int transferTypeId, int transferStatusId) {
         Transfer newTransfer = null;
 
         // Check if the parameters are valid
@@ -57,19 +64,14 @@ public class JdbcTransferDao implements TransferDao {
             throw new IllegalArgumentException("You have insufficient funds for transfer.");
         }
 
-        String sqlInsertTransfer = "INSERT INTO transfer (transfer_type_id, transfer_status_id, account_from, account_to, amount) VALUES (?, ?, (SELECT account_id FROM account WHERE user_id = ?),  (SELECT account_id FROM account WHERE user_id = ?), ?) RETURNING transfer_id";
-
-        transferDto.setTransferTypeId(2);
-        transferDto.setTransferStatusId(2);
+        String sqlInsertTransfer = "INSERT INTO transfer (transfer_type_id, transfer_status_id, account_from, account_to, amount) VALUES (?, ?, (SELECT account_id FROM account WHERE user_id = ?), (SELECT account_id FROM account WHERE user_id = ?), ?) RETURNING transfer_id";
 
         try {
             // Insert the transfer and get the new transfer ID
             int newTransferId = jdbcTemplate.queryForObject(
                     sqlInsertTransfer, Integer.class,
-                    transferDto.getTransferTypeId(), transferDto.getTransferStatusId(), transferDto.getAccountFrom(), transferDto.getAccountTo(), transferDto.getAmount()
-
+                    transferTypeId, transferStatusId, transferDto.getAccountFrom(), transferDto.getAccountTo(), transferDto.getAmount()
             );
-
 
             // Retrieve the new transfer object
             newTransfer = getTransferById(newTransferId);
@@ -81,6 +83,46 @@ public class JdbcTransferDao implements TransferDao {
         }
         return newTransfer;
     }
+
+//    public Transfer makeTransfer(TransferDto transferDto) {
+//        Transfer newTransfer = null;
+//
+//        // Check if the parameters are valid
+//        if (transferDto.getAccountFrom() == transferDto.getAccountTo()) {
+//            throw new IllegalArgumentException("Cannot send money to yourself");
+//        }
+//        if (transferDto.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+//            throw new IllegalArgumentException("Cannot send $0 or negative funds.");
+//        }
+//        BigDecimal fromAccountBalance = accountDao.getAccountBalanceByAccountId(transferDto.getAccountFrom()).getBalance();
+//        if (fromAccountBalance.compareTo(transferDto.getAmount()) < 0) {
+//            throw new IllegalArgumentException("You have insufficient funds for transfer.");
+//        }
+//
+//        String sqlInsertTransfer = "INSERT INTO transfer (transfer_type_id, transfer_status_id, account_from, account_to, amount) VALUES (?, ?, (SELECT account_id FROM account WHERE user_id = ?),  (SELECT account_id FROM account WHERE user_id = ?), ?) RETURNING transfer_id";
+//
+//        transferDto.setTransferTypeId(2);
+//        transferDto.setTransferStatusId(2);
+//
+//        try {
+//            // Insert the transfer and get the new transfer ID
+//            int newTransferId = jdbcTemplate.queryForObject(
+//                    sqlInsertTransfer, Integer.class,
+//                    transferDto.getTransferTypeId(), transferDto.getTransferStatusId(), transferDto.getAccountFrom(), transferDto.getAccountTo(), transferDto.getAmount()
+//
+//            );
+//
+//
+//            // Retrieve the new transfer object
+//            newTransfer = getTransferById(newTransferId);
+//
+//        } catch (CannotGetJdbcConnectionException e) {
+//            throw new DaoException("Unable to connect to server or database", e);
+//        } catch (DataIntegrityViolationException e) {
+//            throw new DaoException("Data integrity violation", e);
+//        }
+//        return newTransfer;
+//    }
     //Added method to getTransfersByUserId
     @Override
     public List<Transfer> getTransfersByUserId(int userId) {
@@ -104,7 +146,19 @@ public class JdbcTransferDao implements TransferDao {
             return transferRow;
         }
 
-
+    @Override
+    public List<Transfer> getPendingTransfersByUserId(int userId) {
+        List<Transfer> transfers = new ArrayList<>();
+        String sql = "SELECT * FROM transfer WHERE (account_from IN (SELECT account_id FROM account WHERE user_id = ?) OR account_to IN (SELECT account_id FROM account WHERE user_id = ?)) AND transfer_status_id = 1";
+        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, userId, userId);
+        while (results.next()) {
+            transfers.add(mapRowToTransfer(results));
+        }
+        return transfers;
     }
+
+
+
+}
 
 

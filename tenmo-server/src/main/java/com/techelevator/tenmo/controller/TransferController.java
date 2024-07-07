@@ -86,4 +86,34 @@ public class TransferController {
     public Transfer getTransferById(@PathVariable int transferId) {
         return transferDao.getTransferById(transferId);
     }
+    @PostMapping("/request")
+    public ResponseEntity<String> createTransferRequest(@RequestBody TransferDto transferDto, Principal principal) {
+        // Get the authenticated user (requester)
+        User requester = userDao.getUserByUsername(principal.getName());
+        if (requester == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Requester not found");
+        }
+
+        // Set the accountFrom to the requester's userId
+        transferDto.setAccountFrom(requester.getId());
+
+        // Set the transfer type and status for request
+        transferDto.setTransferTypeId(1); // 1 = Request
+        transferDto.setTransferStatusId(1); // 1 = Pending
+
+        // Create the transfer request
+        Transfer newTransfer = transferDao.createTransferRequest(transferDto);
+        return ResponseEntity.ok("Transfer request " + newTransfer.getTransferId() + " created successfully");
+    }
+
+    @GetMapping("/{userId}/pendingtransfers")
+    public ResponseEntity<List<Transfer>> getPendingTransfersByUserId(@PathVariable int userId, Principal principal) {
+        User authenticatedUser = userDao.getUserByUsername(principal.getName());
+        if (authenticatedUser.getId() != userId) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        List<Transfer> transfers = transferDao.getPendingTransfersByUserId(userId);
+        return new ResponseEntity<>(transfers, HttpStatus.OK);
+    }
+
 }
