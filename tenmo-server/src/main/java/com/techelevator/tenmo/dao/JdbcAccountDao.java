@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
-import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 @Repository
@@ -46,5 +45,22 @@ public class JdbcAccountDao implements AccountDao {
         account.setBalance(rowSet.getBigDecimal("balance"));
         return account;
     }
+
+    @Override
+    public Account getAccountBalanceByAccountIds(int accountId) {
+        Account account = null;
+        String sql = "SELECT * FROM account WHERE account_id = ?";
+        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, accountId);
+        if (results.next()) {
+            account = mapRowToAccount(results);
+        }
+        if (account == null) {
+            throw new IllegalArgumentException("Account with ID " + accountId + " does not exist.");
+        }
+        return account;
+    }
+
+
+
 
 }

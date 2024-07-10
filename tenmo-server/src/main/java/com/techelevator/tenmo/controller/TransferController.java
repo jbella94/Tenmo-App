@@ -1,6 +1,7 @@
 package com.techelevator.tenmo.controller;
 
 import com.techelevator.tenmo.dao.AccountDao;
+import com.techelevator.tenmo.dao.JdbcTransferDao;
 import com.techelevator.tenmo.dao.TransferDao;
 import com.techelevator.tenmo.dao.UserDao;
 import com.techelevator.tenmo.model.Account;
@@ -25,11 +26,13 @@ public class TransferController {
     private final TransferDao transferDao;
     private final AccountDao accountDao;
     private final UserDao userDao;
+    //private final TransferDto transferDto;
     @Autowired
     public TransferController(TransferDao transferDao, AccountDao accountDao, UserDao userDao) {
         this.transferDao = transferDao;
         this.accountDao = accountDao;
         this.userDao = userDao;
+        //this.transferDto = transferDto;
     }
     @PostMapping("/maketransfer")
     public ResponseEntity<String> makeTransfer(@RequestBody TransferDto transferDto, Principal principal) {
@@ -94,6 +97,8 @@ public class TransferController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Requester not found");
         }
 
+
+
         // Set the accountFrom to the requester's userId
         transferDto.setAccountFrom(requester.getId());
 
@@ -116,4 +121,36 @@ public class TransferController {
         return new ResponseEntity<>(transfers, HttpStatus.OK);
     }
 
+    @PostMapping("/transfer/{transferId}/approve")
+    public ResponseEntity<String> approveTransfer(@PathVariable int transferId, Principal principal) {
+        try {
+            if (principal == null || principal.getName() == null) {
+                throw new IllegalArgumentException("User is not authenticated");
+            }
+            Transfer transferDto = transferDao.getTransferById(transferId);
+            BigDecimal fromAccountBalance = accountDao.getAccountBalanceByAccountIds(transferDto.getAccountTo()).getBalance();
+            if (fromAccountBalance.compareTo(transferDto.getAmount()) < 0) {
+                throw new IllegalArgumentException("You have insufficient funds for transfer.");
+            }
+
+            transferDao.approveTransferRequest(transferId, principal.getName());
+            return ResponseEntity.ok("Transfer approved");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred" + e.getMessage());
+        }
+    }
+    @PostMapping("/transfer/{transferId}/reject")
+    public ResponseEntity<String> rejectTransfer(@PathVariable int transferId, Principal principal) {
+        try {
+            if (principal == null || principal.getName() == null) {
+                throw new IllegalArgumentException("User is not authenticated");
+            }
+            transferDao.rejectTransferRequest(transferId, principal.getName());
+            return ResponseEntity.ok("Transfer rejected");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
+        }
+    }
 }

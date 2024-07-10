@@ -8,4 +8,6 @@ public interface AccountDao {
 
 
     void save(Account Account);
+
+    Account getAccountBalanceByAccountIds(int accountId);
 }

@@ -18,4 +18,11 @@ public interface TransferDao {
     Transfer createTransferRequest(TransferDto transferDto);
 
     List<Transfer> getPendingTransfersByUserId(int userId);
+
+    void updateTransferStatus(int transferId, int statusId);
+
+
+    void approveTransferRequest(int transferId, String user);
+
+    void rejectTransferRequest(int transferId, String user);
 }
