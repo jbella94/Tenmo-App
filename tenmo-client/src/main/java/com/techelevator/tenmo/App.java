@@ -158,12 +158,36 @@ public class App {
             System.out.println("----------------------------");
             System.out.println("Below are your pending transfers:");
             List<Transfer> transfers = transferService.viewPendingRequests(currentUser.getToken(), currentUser.getUser().getId());
-            for(Transfer transfer : transfers){
-                System.out.println(transfers);
+
+            if (transfers.isEmpty()) {
+                System.out.println("You have no pending transfers.");
+                mainMenu(); // Call to the main menu method
+                return;
             }
 
-        }else {
-            System.out.println("Invalid Selection");
+            for(Transfer transfer : transfers){
+
+                System.out.println(transfers);
+                System.out.println("                ");
+                System.out.println("If you would like to approve a transfer enter 1");
+                System.out.println("If you would like to reject a transfer enter 2");
+            }
+            int userSelection = Integer.parseInt(scanner.nextLine());
+            if (userSelection == 1) {
+                System.out.println("Please enter a transfer ID from the list above.");
+                int transferId = Integer.parseInt(scanner.nextLine());
+                String result = transferService.approveTransfer(currentUser.getToken(), transferId);
+                System.out.println(result);
+            } else if (userSelection == 2) {
+                System.out.println("Please enter a transfer ID from the list above.");
+                int transferId = Integer.parseInt(scanner.nextLine());
+                String result = transferService.rejectTransfer(currentUser.getToken(), transferId);
+                System.out.println(result);
+            } else {
+                System.out.println("Invalid Selection");
+            }
+
+
         }
 		
 	}

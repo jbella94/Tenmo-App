@@ -13,6 +13,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 public class TransferService {
@@ -172,5 +173,55 @@ public class TransferService {
         return bucksRequested;
     }
 
+    public String approveTransfer(String authToken, int transferId) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(authToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        try {
+            String url = API_BASE_URL + "accounts/transfers/transfer/{transferId}/approve";
+            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url)
+                    .uriVariables(Map.of("transferId", transferId));
+            ResponseEntity<String> response = restTemplate.exchange(
+                    builder.toUriString(),
+                    HttpMethod.POST,
+                    entity,
+                    String.class
+            );
+            return response.getBody();
+        } catch (RestClientResponseException e) {
+            return "Error: " + e.getResponseBodyAsString();
+        } catch (Exception e) {
+            return "An unexpected error occurred: " + e.getMessage();
+        }
     }
+    public String rejectTransfer(String authToken, int transferId) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(authToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        try {
+            String url = API_BASE_URL + "accounts/transfers/transfer/{transferId}/reject";
+            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url)
+                    .uriVariables(Map.of("transferId", transferId));
+            ResponseEntity<String> response = restTemplate.exchange(
+                    builder.toUriString(),
+                    HttpMethod.POST,
+                    entity,
+                    String.class
+            );
+            return response.getBody();
+        } catch (RestClientResponseException e) {
+            return "Error: " + e.getResponseBodyAsString();
+        } catch (Exception e) {
+            return "An unexpected error occurred: " + e.getMessage();
+        }
+    }
+}
+
+
 
